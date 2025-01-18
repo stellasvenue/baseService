@@ -33,12 +33,26 @@ class BaseService {
     ]
   }
 
-  async storeDB (PK, SK, data) {
+  async storeDB(PK, SK, data, indexes = {}) {
+    // Destructure optional indexes with defaults
+    const { GSI1PK, GSI1SK, GSI2PK, GSI3PK } = indexes;
+
+    // Construct the parameters
     const params = {
       TableName: process.env.SYSTEMTABLE,
-      Item: this.sanitizeData({ PK, SK, attributes: data })
-    }
-    return await this._db.send(new PutCommand(params))
+      Item: this.sanitizeData({
+        PK,
+        SK,
+        attributes: data,
+        ...(GSI1PK && { GSI1PK }),
+        ...(GSI1SK && { GSI1SK }),
+        ...(GSI2PK && { GSI2PK }),
+        ...(GSI3PK && { GSI3PK }),
+      }),
+    };
+
+    // Execute the DynamoDB PutCommand
+    return await this._db.send(new PutCommand(params));
   }
 
   async getDB (PK, SK) {
