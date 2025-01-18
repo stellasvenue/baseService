@@ -67,6 +67,25 @@ class BaseService {
       throw error;
     }
   }
+  async getDBGSI1SKPrefix(GSI1PK, SKPrefix) {
+    const params = {
+      TableName: process.env.SYSTEMTABLE,
+      IndexName: 'GSI1PK', // Name of your GSI index
+      KeyConditionExpression: "GSI1PK = :gsi1pk AND begins_with(GSI1SK, :skPrefix)",
+      ExpressionAttributeValues: {
+        ":gsi1pk": GSI1PK,
+        ":skPrefix": SKPrefix,
+      },
+    };
+
+    try {
+      const result = await this._db.send(new QueryCommand(params));
+      return result.Items; // Return the matching items
+    } catch (error) {
+      console.error("Error fetching items by SK prefix:", error);
+      throw error;
+    }
+  }
 
   async getDbGSI2PK(GSI2PKValue) {
     const params = {
