@@ -349,7 +349,7 @@ class BaseService {
 
     const dayOfWeek = date.getUTCDay();
 
-    if (dayOfWeek === 5 || dayOfWeek === 6 || dayOfWeek === 0) {
+    if (dayOfWeek === 5 || dayOfWeek === 6 ) {
       return 'Weekend';
     } else {
       return 'Weekday';
