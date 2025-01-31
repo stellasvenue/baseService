@@ -365,6 +365,45 @@ class BaseService {
     return futureDate;
   }
 
+  parseHoursFromString(durationString) {
+    const match = durationString.match(/\d+/); // Extracts the first number found
+    return match ? parseInt(match[0], 10) : 0; // Converts to integer, default to 0 if not found
+  }
+
+  calculateEndTime(startTime, durationString) {
+    const hours = this.parseHoursFromString(durationString);
+    const startDate = new Date(startTime);
+    startDate.setHours(startDate.getHours() + hours);
+    return startDate.toISOString();
+  }
+
+  isoToStandardDate(isoString) {
+    const date = new Date(isoString);
+
+    if (isNaN(date.getTime())) {
+      return "Invalid Date";
+    }
+
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric"
+    });
+  }
+
+  isoToStandardTime(isoString) {
+    const date = new Date(isoString);
+
+    if (isNaN(date.getTime())) {
+      return "Invalid Time";
+    }
+
+    return date.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true
+    });
+  }
 }
 
 module.exports = BaseService
