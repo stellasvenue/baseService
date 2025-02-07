@@ -229,17 +229,24 @@ class BaseService {
     return await this._s3.send(new PutObjectCommand(params))
   }
 
-  async uploadReadableStream (fileName, readableStream) {
+  async uploadReadableStream (fileName, readableStream, contentType) {
     const uploadParams = {
       Bucket: process.env.MESSAGE_BUCKET,
       Key: String(fileName),
-      Body: readableStream
+      Body: readableStream,
+    };
+
+    // Only add ContentType if it is passed
+    if (contentType) {
+      uploadParams.ContentType = contentType;
     }
+
     const upload = new Upload({
       client: this._s3,
-      params: uploadParams
-    })
-    return await upload.done()
+      params: uploadParams,
+    });
+
+    return await upload.done();
   }
 
   camelize (str) {

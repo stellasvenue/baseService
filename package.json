@@ -1,6 +1,6 @@
 {
   "name": "stellasvenue-baseservice",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Base service for AWS SDK integrations",
   "main": "index.js",
   "license": "UNLICENSED",
