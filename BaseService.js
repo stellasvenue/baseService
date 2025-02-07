@@ -286,6 +286,7 @@ class BaseService {
       Bucket: process.env.MESSAGE_BUCKET,
       Key: String(fileName)
     }
+    console.log(params)
     return await this._s3.send(new GetObjectCommand(params))
   }
 
@@ -371,10 +372,39 @@ class BaseService {
   }
 
   calculateEndTime(startTime, durationString) {
-    const hours = this.parseHoursFromString(durationString);
-    const startDate = new Date(startTime);
-    startDate.setHours(startDate.getHours() + hours);
-    return startDate.toISOString();
+    const hoursToAdd = parseFloat(durationString);
+
+    // Check if startTime is in HH:mm (24-hour) format using a simple regex
+    const militaryTimeRegex = /^\d{2}:\d{2}$/;
+    const isMilitaryTime = militaryTimeRegex.test(startTime);
+
+    let date;
+
+    if (isMilitaryTime) {
+      // Parse "HH:mm" into hours/minutes
+      const [startHour, startMinute] = startTime.split(':').map(Number);
+
+      // Create a new Date object for "today" (the date portion is arbitrary)
+      date = new Date();
+      date.setHours(startHour, startMinute, 0, 0);
+
+      // Add the hours to the date
+      date.setHours(date.getHours() + hoursToAdd);
+
+      // Format back to HH:mm
+      const endHour = String(date.getHours()).padStart(2, '0');
+      const endMinute = String(date.getMinutes()).padStart(2, '0');
+      return `${endHour}:${endMinute}`;
+    } else {
+      // Assume it's an ISO date/time string
+      date = new Date(startTime);
+
+      // Add the hours
+      date.setHours(date.getHours() + hoursToAdd);
+
+      // Return as ISO
+      return date.toISOString();
+    }
   }
 
   isoToStandardDate(isoString) {
@@ -403,6 +433,23 @@ class BaseService {
       minute: "2-digit",
       hour12: true
     });
+  }
+
+  convert24to12(time24) {
+    // Split the input into hours and minutes
+    let [hourStr, minuteStr] = time24.split(":");
+
+    // Convert hour to a number
+    let hour = parseInt(hourStr, 10);
+
+    // Determine AM or PM suffix
+    const suffix = hour >= 12 ? "PM" : "AM";
+
+    // Convert "hour" to 12-hour format (0 should map to 12)
+    hour = hour % 12 || 12;
+
+    // Return the formatted string
+    return `${hour}:${minuteStr} ${suffix}`;
   }
 }
 
