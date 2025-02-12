@@ -6,7 +6,7 @@ const { EventBridgeClient, PutEventsCommand } = require('@aws-sdk/client-eventbr
 const { LambdaClient, InvokeCommand } = require('@aws-sdk/client-lambda');
 
 class BaseService {
-  constructor () {
+  constructor() {
     // Initialize S3 client
     this._s3 = new S3Client({})
 
@@ -35,7 +35,7 @@ class BaseService {
 
   async storeDB(PK, SK, data, indexes = {}) {
     // Destructure optional indexes with defaults
-    const { GSI1PK, GSI1SK, GSI2PK, GSI3PK } = indexes;
+    const {GSI1PK, GSI1SK, GSI2PK, GSI3PK} = indexes;
 
     // Construct the parameters
     const params = {
@@ -44,10 +44,10 @@ class BaseService {
         PK,
         SK,
         attributes: data,
-        ...(GSI1PK && { GSI1PK }),
-        ...(GSI1SK && { GSI1SK }),
-        ...(GSI2PK && { GSI2PK }),
-        ...(GSI3PK && { GSI3PK }),
+        ...(GSI1PK && {GSI1PK}),
+        ...(GSI1SK && {GSI1SK}),
+        ...(GSI2PK && {GSI2PK}),
+        ...(GSI3PK && {GSI3PK}),
       }),
     };
 
@@ -55,10 +55,10 @@ class BaseService {
     return await this._db.send(new PutCommand(params));
   }
 
-  async getDB (PK, SK) {
+  async getDB(PK, SK) {
     const params = {
       TableName: process.env.SYSTEMTABLE,
-      Key: { PK, SK }
+      Key: {PK, SK}
     }
     return await this._db.send(new GetCommand(params))
   }
@@ -81,6 +81,7 @@ class BaseService {
       throw error;
     }
   }
+
   async getDBGSI1SKPrefix(GSI1PK, SKPrefix) {
     const params = {
       TableName: process.env.SYSTEMTABLE,
@@ -141,11 +142,11 @@ class BaseService {
 
   async updateDB(PK, SK, data, optionalKeys = {}) {
     // Destructure optional keys from the optionalKeys object
-    const { GSI1PK, GSI1SK, GSI2PK, GSI3PK } = optionalKeys;
+    const {GSI1PK, GSI1SK, GSI2PK, GSI3PK} = optionalKeys;
 
     // Start with the basic UpdateExpression and values
     let updateExpression = 'set attributes = :a';
-    const expressionAttributeValues = { ':a': data };
+    const expressionAttributeValues = {':a': data};
     const expressionAttributeNames = {};
 
     // Dynamically add optional keys
@@ -173,7 +174,7 @@ class BaseService {
     // Construct the final params object
     const params = {
       TableName: process.env.SYSTEMTABLE,
-      Key: { PK, SK },
+      Key: {PK, SK},
       UpdateExpression: updateExpression,
       ExpressionAttributeValues: expressionAttributeValues,
     };
@@ -198,7 +199,7 @@ class BaseService {
 
     try {
       const result = await this._db.send(new DeleteCommand(params));
-      console.log("Item deleted successfully:", { PK, SK });
+      console.log("Item deleted successfully:", {PK, SK});
       return result; // Return result or metadata if needed
     } catch (error) {
       console.error("Error deleting item:", error);
@@ -206,7 +207,7 @@ class BaseService {
     }
   }
 
-  async putEvents (eventName, data) {
+  async putEvents(eventName, data) {
     const params = {
       Entries: [
         {
@@ -220,7 +221,7 @@ class BaseService {
     return await this._eventBridge.send(new PutEventsCommand(params))
   }
 
-  async logObject (fileName, data) {
+  async logObject(fileName, data) {
     const params = {
       Bucket: process.env.MESSAGE_BUCKET,
       Key: String(fileName),
@@ -229,7 +230,7 @@ class BaseService {
     return await this._s3.send(new PutObjectCommand(params))
   }
 
-  async uploadReadableStream (fileName, readableStream, contentType) {
+  async uploadReadableStream(fileName, readableStream, contentType) {
     const uploadParams = {
       Bucket: process.env.MESSAGE_BUCKET,
       Key: String(fileName),
@@ -249,18 +250,18 @@ class BaseService {
     return await upload.done();
   }
 
-  camelize (str) {
+  camelize(str) {
     return str
         .replace(/\s/g, '')
         .replace(/(?:^\w|[A-Z]|\b\w)/g, (word, index) => index === 0 ? word.toLowerCase() : word.toUpperCase())
         .replace(/\s+/g, '')
   }
 
-  isEmpty (obj) {
+  isEmpty(obj) {
     return Object.keys(obj).length === 0
   }
 
-  async checkOpenTask (phoneNumber) {
+  async checkOpenTask(phoneNumber) {
     const params = {
       TableName: process.env.SYSTEMTABLE,
       KeyConditionExpression: 'PK = :pk and begins_with(SK, :sk)',
@@ -279,7 +280,7 @@ class BaseService {
     return result.Items
   }
 
-  async invokeStep (functionName, payload) {
+  async invokeStep(functionName, payload) {
     const params = {
       FunctionName: 'StellasVenue-prod-' + functionName,
       InvocationType: 'Event',
@@ -288,7 +289,7 @@ class BaseService {
     return await this._lambda.send(new InvokeCommand(params))
   }
 
-  async getFile (fileName) {
+  async getFile(fileName) {
     const params = {
       Bucket: process.env.MESSAGE_BUCKET,
       Key: String(fileName)
@@ -297,7 +298,7 @@ class BaseService {
     return await this._s3.send(new GetObjectCommand(params))
   }
 
-  dateToISOString (date) {
+  dateToISOString(date) {
     return new Date(date).toISOString()
   }
 
@@ -357,7 +358,7 @@ class BaseService {
 
     const dayOfWeek = date.getUTCDay();
 
-    if (dayOfWeek === 5 || dayOfWeek === 6 ) {
+    if (dayOfWeek === 5 || dayOfWeek === 6) {
       return 'Weekend';
     } else {
       return 'Weekday';
@@ -484,4 +485,5 @@ class BaseService {
     return isoDateTime;
   }
 
+}
 module.exports = BaseService

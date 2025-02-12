@@ -4,3 +4,4 @@
 **/.serverless
 backend/resources/logs/oAuthClient-log.log
 backend/baseService
+/node_modules
