@@ -458,6 +458,30 @@ class BaseService {
     // Return the formatted string
     return `${hour}:${minuteStr} ${suffix}`;
   }
-}
+
+  combineISODateAndTime(dateISO, time) {
+    // Ensure the input date is a valid ISO date
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(dateISO)) {
+      throw new Error("Invalid date format. Expected YYYY-MM-DD.");
+    }
+
+    // Ensure the input time is a valid time format
+    if (!/^\d{2}:\d{2}(:\d{2})?$/.test(time)) {
+      throw new Error("Invalid time format. Expected HH:MM or HH:MM:SS.");
+    }
+
+    // Ensure time has seconds
+    if (time.length === 5) {
+      time += ":00"; // Append ":00" if seconds are missing
+    }
+
+    // Create the combined ISO date-time string
+    const dateTimeString = `${dateISO}T${time}`;
+
+    // Convert to ISO format with time zone if needed
+    const isoDateTime = new Date(dateTimeString).toISOString();
+
+    return isoDateTime;
+  }
 
 module.exports = BaseService
